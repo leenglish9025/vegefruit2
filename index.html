@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit and Vegetable Quiz</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        button {
+            display: block;
+            margin: 10px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            background-color: #f0f0f0;
+            font-size: 16px;
+        }
+        button.correct {
+            background-color: lightgreen;
+        }
+        button.incorrect {
+            background-color: lightcoral;
+        }
+        #progress-bar {
+            width: 80%;
+            height: 10px;
+            background-color: lightgray;
+            border-radius: 5px;
+            margin-top: 20px;
+            position: relative;
+        }
+        #progress {
+            height: 100%;
+            background-color: yellow;
+            width: 0;
+            border-radius: 5px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="progress-bar">
+        <div id="progress"></div>
+    </div>
+    
+    <div class="container">
+        <h1>Choose the correct match</h1>
+        
+        <div id="page-1">
+            <p>Choose the correct match for '옥수수'</p>
+            <button onclick="checkAnswer(1, 'corn', true)">corn</button>
+            <button onclick="checkAnswer(1, 'apple', false)">apple</button>
+            <button onclick="checkAnswer(1, 'banana', false)">banana</button>
+            <button onclick="checkAnswer(1, 'tomato', false)">tomato</button>
+            <button onclick="checkAnswer(1, 'lemon', false)">lemon</button>
+            <br><button onclick="nextPage(1)">Next</button>
+        </div>
+
+        <div id="page-2" class="hidden">
+            <p>Choose the correct match for '사과'</p>
+            <button onclick="checkAnswer(2, 'apple', true)">apple</button>
+            <button onclick="checkAnswer(2, 'orange', false)">orange</button>
+            <button onclick="checkAnswer(2, 'potato', false)">potato</button>
+            <button onclick="checkAnswer(2, 'cucumber', false)">cucumber</button>
+            <button onclick="checkAnswer(2, 'plum', false)">plum</button>
+            <br><button onclick="nextPage(2)">Next</button>
+        </div>
+
+        <!-- 다른 페이지를 추가할 수 있습니다 -->
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 5;
+
+        function checkAnswer(page, answer, isCorrect) {
+            const buttons = document.querySelectorAll(`#page-${page} button`);
+            buttons.forEach(button => {
+                button.disabled = true;
+            });
+            if (isCorrect) {
+                event.target.classList.add('correct');
+            } else {
+                event.target.classList.add('incorrect');
+                setTimeout(() => {
+                    buttons.forEach(button => {
+                        if (button.innerText === answer) {
+                            button.classList.add('correct');
+                        }
+                    });
+                }, 1000);
+            }
+        }
+
+        function nextPage(currentPage) {
+            document.getElementById(`page-${currentPage}`).classList.add('hidden');
+            document.getElementById(`page-${currentPage + 1}`).classList.remove('hidden');
+            updateProgress(currentPage + 1);
+        }
+
+        function updateProgress(page) {
+            const progress = (page / totalPages) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+        
+        // 초기화 시 첫 페이지의 진행 상황 표시
+        updateProgress(currentPage);
+    </script>
+</body>
+</html>
