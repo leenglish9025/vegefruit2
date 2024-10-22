@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fruit and Vegetable Quiz</title>
+    <title>Matching Game</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
@@ -17,116 +17,163 @@
         h1 {
             text-align: center;
         }
+        .hidden { display: none; }
+        .matched { background-color: lightgreen; }
+        .incorrect { background-color: lightcoral; }
         button {
-            display: block;
-            margin: 10px;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
+            margin: 5px;
+            padding: 10px;
+            width: 100px;
+            border-radius: 12px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            background-color: #f0f0f0;
-            font-size: 16px;
+            transition: transform 0.2s ease-in-out;
         }
-        button.correct {
-            background-color: lightgreen;
+        button:hover {
+            transform: scale(1.05);
         }
-        button.incorrect {
-            background-color: lightcoral;
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            max-width: 500px; /* 가로 크기를 제한 */
         }
-        #progress-bar {
-            width: 80%;
-            height: 10px;
-            background-color: lightgray;
-            border-radius: 5px;
+        td {
+            text-align: center;
+            padding: 10px;
+        }
+        #check-btn {
             margin-top: 20px;
-            position: relative;
         }
-        #progress {
+        .progress-bar-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            height: 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .progress-bar {
+            width: 20%; /* 초기값을 5페이지 중 1페이지로 설정 */
             height: 100%;
             background-color: yellow;
-            width: 0;
-            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div id="progress-bar">
-        <div id="progress"></div>
+    <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
     </div>
-    
-    <div class="container">
-        <h1>Choose the correct match</h1>
-        
-        <div id="page-1">
-            <p>Choose the correct match for '옥수수'</p>
-            <button onclick="checkAnswer(1, 'corn', true)">corn</button>
-            <button onclick="checkAnswer(1, 'apple', false)">apple</button>
-            <button onclick="checkAnswer(1, 'banana', false)">banana</button>
-            <button onclick="checkAnswer(1, 'tomato', false)">tomato</button>
-            <button onclick="checkAnswer(1, 'lemon', false)">lemon</button>
-            <br><button onclick="nextPage(1)">Next</button>
-        </div>
 
-        <div id="page-2" class="hidden">
-            <p>Choose the correct match for '사과'</p>
-            <button onclick="checkAnswer(2, 'apple', true)">apple</button>
-            <button onclick="checkAnswer(2, 'orange', false)">orange</button>
-            <button onclick="checkAnswer(2, 'potato', false)">potato</button>
-            <button onclick="checkAnswer(2, 'cucumber', false)">cucumber</button>
-            <button onclick="checkAnswer(2, 'plum', false)">plum</button>
-            <br><button onclick="nextPage(2)">Next</button>
-        </div>
+    <h1>의미가 일치하는 단어를 짝지으세요</h1>
 
-        <!-- 다른 페이지를 추가할 수 있습니다 -->
+    <!-- Page 1 -->
+    <div id="page-1">
+        <table>
+            <tr>
+                <td><button onclick="selectWord('korean', '옥수수', this)">옥수수</button></td>
+                <td><button onclick="selectWord('english', 'onion', this)">onion</button></td>
+            </tr>
+            <tr>
+                <td><button onclick="selectWord('korean', '고추', this)">고추</button></td>
+                <td><button onclick="selectWord('english', 'tomato', this)">tomato</button></td>
+            </tr>
+            <tr>
+                <td><button onclick="selectWord('korean', '양파', this)">양파</button></td>
+                <td><button onclick="selectWord('english', 'corn', this)">corn</button></td>
+            </tr>
+            <tr>
+                <td><button onclick="selectWord('korean', '토마토', this)">토마토</button></td>
+                <td><button onclick="selectWord('english', 'apple', this)">apple</button></td>
+            </tr>
+            <tr>
+                <td><button onclick="selectWord('korean', '사과', this)">사과</button></td>
+                <td><button onclick="selectWord('english', 'pepper', this)">pepper</button></td>
+            </tr>
+        </table>
+        <button id="check-btn-1" class="hidden" onclick="nextPage()">확인</button>
     </div>
+
+    <!-- Other pages... -->
 
     <script>
-        let currentPage = 1;
-        const totalPages = 5;
+        let selectedKorean = '';
+        let selectedEnglish = '';
+        let selectedKoreanButton = null;
+        let selectedEnglishButton = null;
+        let correctMatches = 0;
+        let currentPage = 1; // 전역 변수로 현재 페이지 상태 유지
 
-        function checkAnswer(page, answer, isCorrect) {
-            const buttons = document.querySelectorAll(`#page-${page} button`);
-            buttons.forEach(button => {
-                button.disabled = true;
-            });
-            if (isCorrect) {
-                event.target.classList.add('correct');
-            } else {
-                event.target.classList.add('incorrect');
-                setTimeout(() => {
-                    buttons.forEach(button => {
-                        if (button.innerText === answer) {
-                            button.classList.add('correct');
-                        }
-                    });
-                }, 1000);
+        function selectWord(type, word, button) {
+            if (type === 'korean') {
+                selectedKorean = word;
+                if (selectedKoreanButton) {
+                    selectedKoreanButton.classList.remove('selected');
+                }
+                selectedKoreanButton = button;
+                selectedKoreanButton.classList.add('selected');
+            } else if (type === 'english') {
+                selectedEnglish = word;
+                if (selectedEnglishButton) {
+                    selectedEnglishButton.classList.remove('selected');
+                }
+                selectedEnglishButton = button;
+                selectedEnglishButton.classList.add('selected');
+            }
+
+            if (selectedKorean && selectedEnglish) {
+                checkMatch();
             }
         }
 
-        function nextPage(currentPage) {
-            document.getElementById(`page-${currentPage}`).classList.add('hidden');
-            document.getElementById(`page-${currentPage + 1}`).classList.remove('hidden');
-            updateProgress(currentPage + 1);
+        function checkMatch() {
+            if (isCorrectMatch(selectedKorean, selectedEnglish)) {
+                selectedKoreanButton.classList.add('matched');
+                selectedEnglishButton.classList.add('matched');
+                correctMatches++;
+            } else {
+                selectedKoreanButton.classList.add('incorrect');
+                selectedEnglishButton.classList.add('incorrect');
+                setTimeout(() => {
+                    selectedKoreanButton.classList.remove('incorrect');
+                    selectedEnglishButton.classList.remove('incorrect');
+                }, 1000);
+            }
+
+            // Reset selections
+            selectedKorean = '';
+            selectedEnglish = '';
+            selectedKoreanButton = null;
+            selectedEnglishButton = null;
+
+            // Check if all pairs are matched
+            if (correctMatches === 5) {
+                document.getElementById(`check-btn-${currentPage}`).classList.remove('hidden');
+            }
         }
 
-        function updateProgress(page) {
-            const progress = (page / totalPages) * 100;
-            document.getElementById('progress').style.width = `${progress}%`;
+        function isCorrectMatch(korean, english) {
+            const correctPairs = {
+                '옥수수': 'corn', '고추': 'pepper', '양파': 'onion', '토마토': 'tomato', '사과': 'apple',
+                '레몬': 'lemon', '완두콩': 'pea', '가지': 'eggplant', '오렌지': 'orange', '오이': 'cucumber',
+                '바나나': 'banana', '자두': 'plum', '감자': 'potato', '마늘': 'garlic', '파프리카': 'paprika',
+                '망고': 'mango', '딸기': 'strawberry', '호박': 'pumpkin', '아보카도': 'avocado', '당근': 'carrot',
+                '배': 'pear', '포도': 'grape', '파인애플': 'pineapple', '복숭아': 'peach', '시금치': 'spinach'
+            };
+            return correctPairs[korean] === english;
         }
-        
-        // 초기화 시 첫 페이지의 진행 상황 표시
-        updateProgress(currentPage);
+
+        function nextPage() {
+            document.getElementById(`page-${currentPage}`).classList.add('hidden');
+            currentPage++;
+            document.getElementById(`page-${currentPage}`).classList.remove('hidden');
+            correctMatches = 0;
+
+            // Update progress bar
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = (currentPage / 5) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
     </script>
 </body>
 </html>
+
